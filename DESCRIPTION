@@ -1,11 +1,21 @@
 Package: HMMpack
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Hidden Markov Chain model for sequential data
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Jingkun Lin
+Maintainer: Jingkun Lin <ljkwuin@gmail.com>
+Description: 
+We implemented a Hidden Markov Chain model class with latent variable sequence 
+generator. With the latent model, we can further assign a generating process from 
+each latent state to the real data. A Gaussian generating model is implemented. 
+    Aside from generating models and data, we also need to do the inferences. The 
+    calculation of log-likelihood of given model and data is incorporated in each 
+    model class. 
+    
+    A sampling process is implemented with Rstan. 
+    
+    Result visualization and cross-validation.
+
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
