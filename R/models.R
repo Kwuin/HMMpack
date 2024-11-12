@@ -9,7 +9,7 @@ HMM <- setRefClass("HMM",
 
                    methods = list(
                      # Initialize the HMM
-                     initialize = function(n_states, trans_mat = NULL, init_prob = NULL, state_names = NULL) {
+                     initialize = function(n_states = 10, trans_mat = NULL, init_prob = NULL, state_names = NULL) {
                        "Initialize HMM with number of states, transition matrix, and initial probabilities"
                        n_states <<- n_states
 
@@ -202,3 +202,6 @@ HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
                                     }
                                   )
 )
+
+
+hmm_model = HMM(10)
