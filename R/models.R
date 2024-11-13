@@ -1,4 +1,20 @@
-# HMM Class Definition
+#' Title
+#' HMM Class Definition
+#'
+#' @param n_states    # a integer stating the number of states of the latent variable, represented by K
+#' @param trans_mat   # K * K transition matrix of the Markov Chain formed by latent states
+#' @param init_prob   # a numeric vector of K, the starting probability of each states
+#' @param state_names # a vector of K strings, the names of each state
+#'
+#' @return
+#' This is a class of HMM models to store the features of a Hidden Markov Model including the starting probabilities,
+#' the transition matrices and number of states. It also provides a method to generate sequences of latent variables
+#' with given parameters. It provides a method to generate synthetic continuous data and also a log likelihood calculator
+#' for given data, which can be useful if an EM algorithm or variational inference method is to be implemented.
+#' @export
+#'
+#' @examples
+
 HMM <- setRefClass("HMM",
                    fields = list(
                      n_states = "numeric",          # Number of hidden states
@@ -92,7 +108,23 @@ HMM <- setRefClass("HMM",
                    )
 )
 
-# HMM Gaussian Model Class
+#' Title
+#' HMM Gaussian Model Class
+#'
+#' @param hmm_model   # the base Hidden Markov Model used
+#' @param state_variances # a vector of length K recording the variances of the Gaussian emission distribution
+#' of each latent state
+#' @param n_states  # a integer of number of latent states
+#'
+#' @return
+#' This is a class of HMM Gaussian models to store the features of a Hidden Markov Model with Gaussian distribution as emission distribution
+#' for continuous variables.
+#' with given parameters.
+#' @export
+#'
+#' @examples
+#'
+
 HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
                                   fields = list(
                                     hmm_model = "HMM",            # Base HMM model
@@ -202,6 +234,5 @@ HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
                                     }
                                   )
 )
-
 
 hmm_model = HMM(10)
