@@ -20,12 +20,14 @@ HMM <- setRefClass("HMM",
                      n_states = "numeric",          # Number of hidden states
                      trans_mat = "matrix",          # Transition probability matrix
                      init_prob = "numeric",         # Initial state probabilities
-                     state_names = "character"      # Names of the states (optional)
+                     state_names = "character",     # Names of the states (optional)
+                     seed = "numeric"               #seed
                    ),
+
 
                    methods = list(
                      # Initialize the HMM
-                     initialize = function(n_states = 10, trans_mat = NULL, init_prob = NULL, state_names = NULL) {
+                     initialize = function(n_states = 10, trans_mat = NULL, init_prob = NULL, state_names = NULL, seed = 123) {
                        "Initialize HMM with number of states, transition matrix, and initial probabilities"
                        n_states <<- n_states
 
@@ -64,10 +66,19 @@ HMM <- setRefClass("HMM",
                        } else {
                          state_names <<- paste0("State", 1:n_states)
                        }
+
+                       if (is.numeric(seed) && length(seed) == 1 && seed == as.integer(seed)) {
+                         seed <<- seed
+                       } else {
+                         stop("Invalid seed")
+                       }
                      },
+
+
 
                      # Generate sequence of hidden states
                      generate_sequence = function(length) {
+                       set.seed(seed)
                        "Generate a sequence of hidden states of specified length"
                        if (length < 1) {
                          stop("Sequence length must be positive")
@@ -86,6 +97,7 @@ HMM <- setRefClass("HMM",
                            sequence[t] <- sample(1:n_states, 1, prob = trans_mat[current_state,])
                          }
                        }
+
 
                        # Convert numeric states to state names
                        named_sequence <- state_names[sequence]
@@ -129,10 +141,12 @@ HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
                                   fields = list(
                                     hmm_model = "HMM",            # Base HMM model
                                     state_variances = "numeric",   # Variances for each state's Gaussian emissions
-                                    n_states = "numeric"          # Number of states (copied from HMM model)
+                                    n_states = "numeric",          # Number of states (copied from HMM model)
+                                    seed = "numeric"
                                   ),
 
                                   methods = list(
+
                                     # Initialize the Gaussian HMM
                                     initialize = function(hmm_model, state_variances) {
                                       "Initialize Gaussian HMM with base HMM model and state variances"
@@ -155,6 +169,7 @@ HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
                                       state_variances <<- state_variances
                                       n_states <<- hmm_model$n_states
                                     },
+
 
                                     # Generate Gaussian observations
                                     generate_gaussian_observations = function(length) {
@@ -180,11 +195,13 @@ HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
                                       ))
                                     },
 
+
                                     # Calculate emission probability density for a single observation
                                     emission_prob = function(observation, state) {
                                       "Calculate Gaussian emission probability density for given observation and state"
                                       dnorm(observation, mean = state, sd = sqrt(state_variances[state]))
                                     },
+
 
                                     # Calculate log-likelihood of a sequence
                                     calculate_log_likelihood = function(observations) {
@@ -192,13 +209,11 @@ HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
 
                                       T <- length(observations)
                                       alpha <- matrix(0, nrow = T, ncol = n_states)
-
                                       # Initialize forward probabilities (alpha) for t=1
                                       for (j in 1:n_states) {
                                         alpha[1, j] <- log(hmm_model$init_prob[j]) +
                                           log(emission_prob(observations[1], j))
                                       }
-
                                       # Forward algorithm recursion
                                       for (t in 2:T) {
                                         for (j in 1:n_states) {
@@ -214,6 +229,7 @@ HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
                                         }
                                       }
 
+
                                       # Calculate final log-likelihood
                                       logsum <- alpha[T, ]
                                       log_likelihood <- max(logsum) + log(sum(exp(logsum - max(logsum))))
@@ -223,6 +239,7 @@ HMM_Gaussian_Model <- setRefClass("HMM_Gaussian_Model",
                                         forward_probs = alpha
                                       ))
                                     },
+
 
                                     # Show method for displaying model parameters
                                     show = function() {

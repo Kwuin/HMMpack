@@ -13,8 +13,7 @@ library(rstan)
 #' @examples
 
 stan_fit <- function(model_path, stan_data){
-  hmm_model <- stan_model(model_code = readLines(model_path))
-  fit <- sampling(hmm_model,
+  fit <- sampling(stan_model(model_code = readLines(model_path)),
                   data = stan_data,
                   chains = 4,
                   iter = 2000,
@@ -25,6 +24,78 @@ stan_fit <- function(model_path, stan_data){
   return(fit)
 }
 
-stan_to_model <- function(model_path){
 
+
+
+plot_densities <- function(fit, params) {
+  # Extract samples
+  samples <- rstan::extract(fit, params)
+
+  # Create density plots
+  par(mfrow = c(length(params), 1))
+  for(param in params) {
+    density_obj <- density(samples[[param]])
+    plot(density_obj, main=paste("Density of", param))
+  }
+  par(mfrow = c(1, 1))
 }
+
+
+
+
+# Posterior Predictive Checks
+posterior_predictive_check <- function(fit, y_obs, n_samples = 100) {
+  # Extract model parameters
+  A_samples <- rstan::extract(fit, "A")$A      # transition probabilities
+  mu_samples <- rstan::extract(fit, "mu")$mu   # means
+  sigma_samples <- rstan::extract(fit, "sigma")$sigma  # standard deviations
+
+  # Generate simulated data
+  n_obs <- length(y_obs)
+  y_rep <- matrix(0, n_samples, n_obs)
+
+  for(i in 1:n_samples) {
+    # Sample random iteration from posterior
+    iter <- sample(1:nrow(A_samples), 1)
+
+    # Generate new sequence using parameters from this iteration
+    states <- numeric(n_obs)
+    y_rep[i,] <- numeric(n_obs)
+
+    # Initial state
+    states[1] <- sample(1:ncol(A_samples[iter,,]), 1)
+    y_rep[i,1] <- rnorm(1, mu_samples[iter, states[1]], sigma_samples[iter, states[1]])
+
+    # Generate rest of sequence
+    for(t in 2:n_obs) {
+      states[t] <- sample(1:ncol(A_samples[iter,,]), 1,
+                          prob = A_samples[iter, states[t-1],])
+      y_rep[i,t] <- rnorm(1, mu_samples[iter, states[t]],
+                          sigma_samples[iter, states[t]])
+    }
+  }
+
+  # Plot
+  plot(density(y_obs), main="Posterior Predictive Check",
+       xlab="Value", ylab="Density", lwd=2)
+
+  # Add simulated densities
+  for(i in 1:n_samples) {
+    lines(density(y_rep[i,]), col=rgb(0,0,1,0.1))
+  }
+  lines(density(y_obs), lwd=2)
+  legend("topright", c("Observed", "Simulated"),
+         lty=1, col=c("black", rgb(0,0,1,0.5)))
+}
+
+
+
+
+
+# Example usage:
+# fit <- your stan fit object
+# y_obs <- your observed data
+# params <- c("mu", "sigma", "theta")  # your parameters of interest
+# evaluate_fit(fit, y_obs, params)
+
+
