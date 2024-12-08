@@ -12,13 +12,13 @@ library(rstan)
 #'
 #' @examples
 
-stan_fit <- function(model_path, stan_data){
+stan_fit <- function(model_path = "/hmm.stan", stan_data, num_chains = 4, iter_times = 2000, warm_up = 1000){
   fit <- sampling(stan_model(model_code = readLines(model_path)),
                   data = stan_data,
-                  chains = 4,
-                  iter = 2000,
-                  warmup = 1000,
-                  init = rep(list(init_fun()), 4),  # Use our initialization function
+                  chains = num_chains,
+                  iter = iter_times,
+                  warmup = warm_up,
+                  #init = rep(list(init_fun()), 4),
                   control = list(adapt_delta = 0.99,
                                  max_treedepth = 15))
   return(fit)
@@ -31,13 +31,25 @@ plot_densities <- function(fit, params) {
   # Extract samples
   samples <- rstan::extract(fit, params)
 
+  # Calculate number of rows and columns for plot layout
+  n_params <- length(params)
+  n_cols <- min(3, n_params)  # maximum 3 columns
+  n_rows <- ceiling(n_params/n_cols)
+
+  # Set up plot layout with reasonable margins
+  old_par <- par(no.readonly = TRUE)  # save old parameters
+  par(mfrow = c(n_rows, n_cols),
+      mar = c(4, 4, 2, 1),  # reduce margins
+      oma = c(0, 0, 2, 0))  # reduce outer margins
+
   # Create density plots
-  par(mfrow = c(length(params), 1))
   for(param in params) {
     density_obj <- density(samples[[param]])
-    plot(density_obj, main=paste("Density of", param))
+    plot(density_obj, main=param, xlab="Value", ylab="Density")
   }
-  par(mfrow = c(1, 1))
+
+  # Reset plotting parameters
+  par(old_par)
 }
 
 
@@ -87,8 +99,6 @@ posterior_predictive_check <- function(fit, y_obs, n_samples = 100) {
   legend("topright", c("Observed", "Simulated"),
          lty=1, col=c("black", rgb(0,0,1,0.5)))
 }
-
-
 
 
 
