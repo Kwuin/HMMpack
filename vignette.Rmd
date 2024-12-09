@@ -20,14 +20,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
-Hidden Markov Model \cite{bishop2006pattern}is widely used for modeling series and it's logically clear for Bayesian inference, for it's forward generating process is explicit. A series of latent status is derived from a hidden Markov process and the data we see comes from a distribution parameterized by the latent status and other parameters invariant to state. The psoterior distribution given a series would be 
+Hidden Markov Model [1] is widely used for modeling series and it's logically clear for Bayesian inference, for it's forward generating process is explicit. A series of latent status is derived from a hidden Markov process and the data we see comes from a distribution parameterized by the latent status and other parameters invariant to state. The psoterior distribution given a series would be 
 $$
 p(\mathbf{X}, \mathbf{Z} | \theta) = p(z_1 | \pi) \left[ \prod_{n=2}^{N} p(z_n | z_{n-1}, \mathbf{A}) \right] \prod_{m=1}^{N} p(x_m | z_m, \phi)
 $$
 
 Where $\mathbf{X}$ is the vector of the sequential data, $\mathbf{Z}$ is the vector of the sequential latent status. $\mathbf{A}$ and $\phi$ are parameters governing the whole model, $\pi$ is the marginal distribution for starting states. $\theta$ is the collection of model parameters. 
 
-Given a proper prior of the model parameters, we can derive a posterior easily and we can do Bayesian inference by sampling methods. One potential choice is Hamiltonian Monte Carlo which has been well optimized in package \textbf{stan}. A \textbf{R} interface \textbf{Rstan}\cite{rstan} is already developed, which makes it easier and faster than rewriting the Monte Carlo algorithms manually. 
+Given a proper prior of the model parameters, we can derive a posterior easily and we can do Bayesian inference by sampling methods. One potential choice is Hamiltonian Monte Carlo which has been well optimized in package \textbf{stan}. A \textbf{R} interface \textbf{Rstan}[2] is already developed, which makes it easier and faster than rewriting the Monte Carlo algorithms manually. 
 
    Model construction
     First we need a class to represent models. Given the model parameters $\theta$, it should contain some basic functionalities and variables of a model instance. 
@@ -255,6 +255,14 @@ For future work, consider:
 - Testing with different numbers of states
 - Exploring different emission distributions
 - Implementing model comparison methods
+
+
+# References
+
+[1] Bishop, C. M. (2006). Pattern recognition and machine learning. Springer.
+
+[2] Stan Development Team. (2024). RStan: the R interface to Stan. R package version 2.26.22. https://mc-stan.org/
+
 ````
 
 This complete markdown file includes:
@@ -267,3 +275,6 @@ This complete markdown file includes:
 7. Clear conclusions
 
 You can save this directly as `hmm_analysis.Rmd` and render it with `rmarkdown::render("hmm_analysis.Rmd")`.
+
+
+
