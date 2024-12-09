@@ -1,6 +1,6 @@
 ---
 title: "Hidden Markov Model Analysis with Stan"
-author: "Your Name"
+author: "Jingkun Lin"
 date: "`r Sys.Date()`"
 output:
   pdf_document:
@@ -29,22 +29,8 @@ Where $\mathbf{X}$ is the vector of the sequential data, $\mathbf{Z}$ is the vec
 
 Given a proper prior of the model parameters, we can derive a posterior easily and we can do Bayesian inference by sampling methods. One potential choice is Hamiltonian Monte Carlo which has been well optimized in package \textbf{stan}. A \textbf{R} interface \textbf{Rstan}[2] is already developed, which makes it easier and faster than rewriting the Monte Carlo algorithms manually. 
 
-   Model construction
-    First we need a class to represent models. Given the model parameters $\theta$, it should contain some basic functionalities and variables of a model instance. 
-
-    
-    
-synthetic data generator
-    Given a model instance, the synthetic data generator would first use the Markov Chain to generate a series of latent status and then sample from the specified distribution to get the data $\mathbf{X}$. The length of the sequence, the transition matrix and the parameters for the sampling distribution should be given. Also the starting state should come from the given marginal distribution $\pi$
-    prior 
-        To do Bayesian inference we need priors for all the model parameters mentioned above. It takes the values of model parameters and then gives a evaluation of density value at the point. 
-log posterior evaluation
-        To do Bayesian inference we need a posterior distribution evaluator at any given values of the model parameters. The parameters are the input and the density value is the output. 
-    HMC sampler 
-        With \textbf{Rstan} interface and code written in \text{Stan} in a separated file, we can do the sampling process automatically.  Based on the samples, we can give the maximum a posteriori estimation of the model parameters and also the uncertainty quantification.
 
 Here's the complete markdown file in a single block that you can copy:
-
 
 
 # Introduction
@@ -62,6 +48,7 @@ The HMM model we're using has the following structure:
 $$
 z_t \sim \text{Categorical}(A_{z_{t-1},\cdot})
 $$
+
 $$
 y_t \sim \mathcal{N}(\mu_{z_t}, \sigma_{z_t}^2)
 $$
@@ -105,15 +92,24 @@ mu_true <- c(-3, 0, 3)
 sigma_true <- c(0.5, 0.5, 0.5)
 ```
 
-## Data Generation
+## Model construction
+First we need a class to represent models. Given the model parameters $\theta$, it should contain some basic functionalities and variables of a model instance. 
+In our case, we use 2 classes to represent the hidden model and a model with gaussian distribution as emission distribution. They take the number of states, the true transition matrix and true starting distribution, the standard variance of emission distribution as parameters and also a random seed to ensure reproductiblitiy. 
 
-Generate data from the HMM using our true parameters.
 
 ```{r data_gen}
 hmm_model <- HMM(K, A_true, pi_true, seed = seed)
 hmm_gaussian_model <- HMM_Gaussian_Model(hmm_model, sigma_true^2)
-y <- hmm_gaussian_model$generate_gaussian_observations(N)$observations
+```
+## Synthetic data generator
+Given a model instance, the synthetic data generator would first use the Markov Chain to generate a series of latent status and then sample from the specified distribution to get the data $\mathbf{X}$. The length of the sequence, the transition matrix and the parameters for the sampling distribution should be given. Also the starting state should come from the given marginal distribution $\pi$. The generator is wrapped in a method of both the latent model and the model with emission. 
 
+```{r}
+y <- hmm_gaussian_model$generate_gaussian_observations(N)$observations
+y
+```
+
+```{r}
 # Prepare data for Stan
 stan_data <- list(
   N = N,
@@ -137,9 +133,9 @@ init_fun <- function() {
 }
 ```
 
-## Model Fitting
+## HMC sampler 
+With \textbf{Rstan} interface and code written in \text{Stan} in a separated file, we can do the sampling process automatically.Based on the samples, we can give the maximum a posteriori estimation of the model parameters and also the uncertainty quantification.
 
-Fit the HMM using Stan. The model estimates transition probabilities, means, and standard deviations for each state.
 
 ```{r fit, results='hide', message=FALSE}
 fit <- stan_fit("hmm.stan", stan_data)
