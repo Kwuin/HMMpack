@@ -263,18 +263,6 @@ For future work, consider:
 
 [2] Stan Development Team. (2024). RStan: the R interface to Stan. R package version 2.26.22. https://mc-stan.org/
 
-````
-
-This complete markdown file includes:
-1. YAML header
-2. All sections with explanations
-3. Code chunks with appropriate options
-4. Mathematical notation
-5. Comprehensive diagnostics
-6. Results interpretation
-7. Clear conclusions
-
-You can save this directly as `hmm_analysis.Rmd` and render it with `rmarkdown::render("hmm_analysis.Rmd")`.
 
 
 

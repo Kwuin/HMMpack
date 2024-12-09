@@ -6,8 +6,25 @@ Run the following code in Rstudio:
 ```{r}
 devtools::install_github("Kwuin/HMMpack")
 ```
+## small example 
+```{r}
+library(HMMpack)
 
-## Remaning part
-1. Result visualization: the sampling result from Rstan should be organized and visualized properly. It includes the MAP point estimation of initial distribution, transition matrix and also an uncertainty quantification report of each parameter. 
-2. Cross validation: the main goal of modeling sequential data is to do the predictions. We would implement a cross validation with a sliding-window based iterative inference and a one shot prediction. Then we would show the error between the prediction and the real data. The error can be $L_0$, $L_1$, $L_2$, cross-entropy, etc. A plot report would be generated. 
-3. On condition on sufficiency of time, we may explore more inference methods like expectation maximization and variational inference. 
+# Generate sample data
+N <- 100  # sequence length
+K <- 3    # number of states
+A <- matrix(c(0.8, 0.1, 0.1,
+              0.1, 0.8, 0.1,
+              0.1, 0.1, 0.8), nrow=K)
+mu <- c(-2, 0, 2)
+sigma <- c(0.5, 0.5, 0.5)
+
+# Simulate data
+sim_data <- simulate_hmm(N, K, A, mu, sigma)
+```
+# Fit model
+```{r}
+fit <- fit_hmm(sim_data, K)
+```
+
+
