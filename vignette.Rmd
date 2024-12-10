@@ -134,7 +134,7 @@ init_fun <- function() {
 ```
 
 ## HMC sampler 
-With \textbf{Rstan} interface and code written in \text{Stan} in a separated file, we can do the sampling process automatically.Based on the samples, we can give the maximum a posteriori estimation of the model parameters and also the uncertainty quantification.
+With \textbf{Rstan} interface and code written in \text{Stan} in a separated file, we can do the sampling process automatically.Based on the samples, we can give the estimation of the model parameters and also the uncertainty quantification.
 
 
 ```{r fit, results='hide', message=FALSE}
@@ -156,6 +156,7 @@ param_names <- c(matrix_param_names,
 
 rstan::traceplot(fit, param_names)
 ```
+We can see that for each parameters the chains of samplers havae mixed. 
 
 ### Effective Sample Size Ratio
 The effective sample size ratio indicates how many effective samples we get relative to the total number of samples.
@@ -170,7 +171,7 @@ Autocorrelation plots show the correlation between samples at different lags.
 ```{r acf_plots, fig.width=10, fig.height=8}
 mcmc_acf(fit, param_names)
 ```
-
+Here in the plots we don't see any significant correlation at lags, which means the samples are independent enough. 
 ### Density Plots
 Posterior density plots show the distribution of parameter estimates.
 
@@ -191,7 +192,7 @@ posterior_predictive_check(fit, y, N)
 
 ## Results Analysis
 
-Compare estimated parameters with true values and assess convergence diagnostics.
+Compare estimated parameters with true values and assess convergence diagnostics. The 
 
 ```{r results}
 
@@ -237,10 +238,10 @@ for(i in 1:K) {
 
 This vignette demonstrated the complete workflow of fitting and analyzing a Hidden Markov Model using Stan, including:
 
-1. **Parameter Estimation**: The model successfully estimated transition probabilities, means, and standard deviations for each state.
-2. **MCMC Diagnostics**: Through trace plots, effective sample sizes, and autocorrelation plots, we assessed the quality of our MCMC sampling.
-3. **Model Fit**: Posterior predictive checks showed how well our model captures the observed data patterns.
-4. **Parameter Recovery**: Comparison with true parameters demonstrated the model's ability to recover the generating parameters.
+1. **Parameter Estimation**: The model successfully estimated transition probabilities, and standard deviation of emission distributions for each state. It doesn't fit the starting distribution because we are doing inference on 1 single sequence of samples which is not sufficient to get a proper estimation of the starting distribution.
+2. **MCMC Diagnostics**: Through trace plots, effective sample sizes, and autocorrelation plots, we assessed the quality of our MCMC sampling.We can see that after using 4 chains with 2000 iteration and 1000 warmup, the sampler mixed well. 
+3. **Model Fit**: Posterior predictive checks showed how well our model captures the observed data patterns. Given a small amount of data, the posterior distribution of correctly estimated transition matrix and emission standard deviation is correct. 
+4. **Parameter Recovery**: Comparison with true parameters demonstrated the model's ability to recover the generating parameters. 
 
 The results show that our HMM implementation successfully:
 - Recovered the true parameter values within reasonable margins
